@@ -108,17 +108,18 @@ def assign_lottery_tickets(participants_data):
         count = 0
         while count < participant["tickets_count"]:
             ticket_id = generate_ticket(ticket_length)
-            ticket_mapping_df = ticket_mapping_df.append(
-                {
-                    "participant_id": participant["participant_id"],
-                    "region": participant["region"],
-                    "contact_number": participant["contact_number"],
-                    "sales": participant["sales"],
-                    "ticket_id": ticket_id,
-                },
-                ignore_index=True,
-            )
-            count += 1
+            if not ticket_mapping_df["ticket_id"].isin([ticket_id]).any():
+                ticket_mapping_df = ticket_mapping_df.append(
+                    {
+                        "participant_id": participant["participant_id"],
+                        "region": participant["region"],
+                        "contact_number": participant["contact_number"],
+                        "sales": participant["sales"],
+                        "ticket_id": ticket_id,
+                    },
+                    ignore_index=True,
+                )
+                count += 1
 
     return ticket_mapping_df
 
