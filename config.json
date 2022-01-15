@@ -1,0 +1,11 @@
+{
+    "session_index": 1,
+    "base_path": "/Users/abhisheksaini/Documents/projects/Lottery Project",
+    "master_path": "master",
+    "master_file": "Book1.xlsx",
+    "session_path": "sessions",
+    "latest_session": "session_7",
+    "participant_file": "participants.csv",
+    "lottery_file": "lottery.csv",
+    "winners_file": "winners.csv"
+}
