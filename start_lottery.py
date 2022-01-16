@@ -45,6 +45,13 @@ if not config_data:
 
 
 base_path = config_data.get("base_path", os.getcwd())
+
+if not os.path.isdir(base_path):
+    print(
+        "\n - Exiting: Base path not found. Please check the config file and try again.\n"
+    )
+    exit()
+
 master_dir = os.path.join(base_path, config_data.get("master_path", "master"))
 session_dir = os.path.join(
     base_path, config_data.get("session_path", "sessions")

@@ -79,12 +79,10 @@ def generate_ticket(ticket_length):
     Args:
         ticket_length(int): length of ticket characters
     """
-    return "".join(
-        random.choices(string.ascii_uppercase + string.digits, k=ticket_length)
-    )
+    return "".join(random.choices(string.digits, k=ticket_length))
 
 
-def assign_lottery_tickets(participants_data):
+def assign_lottery_tickets(participants_data, tickets_collection):
     """
     Function to assign lottery tickets to participants
     * It assigns the lottery ticket id as per the tickets assigned
@@ -102,13 +100,16 @@ def assign_lottery_tickets(participants_data):
             "ticket_id",
         ]
     )
-    ticket_length = 10
+    ticket_length = 5
 
     for _, participant in participants_data.iterrows():
         count = 0
         while count < participant["tickets_count"]:
             ticket_id = generate_ticket(ticket_length)
-            if not ticket_mapping_df["ticket_id"].isin([ticket_id]).any():
+            if (
+                not ticket_mapping_df["ticket_id"].isin([ticket_id]).any()
+                and ticket_id not in tickets_collection
+            ):
                 ticket_mapping_df = ticket_mapping_df.append(
                     {
                         "participant_id": participant["participant_id"],
@@ -120,8 +121,9 @@ def assign_lottery_tickets(participants_data):
                     ignore_index=True,
                 )
                 count += 1
+                tickets_collection.append(ticket_id)
 
-    return ticket_mapping_df
+    return ticket_mapping_df, tickets_collection
 
 
 def get_lottery_winners(lottery_data, winners_count):
@@ -199,16 +201,15 @@ def main(
     Main function call to orchestrate all other functions to fetch the
     winners list and store that list in seprate file.
     """
-
+    tickets_collection = []
     for region in region_list:
-
         region_file_path = os.path.join(latest_session_path, region)
         lottery_file_path = os.path.join(region_file_path, lottery_file)
         winners_file_path = os.path.join(region_file_path, winners_file)
         participant_file_path = os.path.join(
             region_file_path, participant_file
         )
-        winners_count = config_data.get("winners_count", 20)
+        winners_count = config_data.get("winners_count", {}).get(region, 20)
 
         # if file not found on filepath then exit
         if not os.path.isfile(participant_file_path):
@@ -227,17 +228,19 @@ def main(
 
         # generate the lottery tickets for user
         # create a seprate file for storing the lottery ticket id with user data
-        tickets_data = assign_lottery_tickets(participants_data)
+        tickets_data, tickets_collection = assign_lottery_tickets(
+            participants_data, tickets_collection
+        )
 
         # save the lottery data in a seperate file
-        tickets_data.to_csv(lottery_file_path)
+        tickets_data.to_csv(lottery_file_path, index=False)
 
         # select the winners from the file - max 20
         # 1 user cannot win more than 3 times
         winners = get_lottery_winners(tickets_data, winners_count)
 
         # save the winners data in a seperate file
-        winners.to_csv(winners_file_path)
+        winners.to_csv(winners_file_path, index=False)
 
 
 if __name__ == "__main__":

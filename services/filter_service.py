@@ -17,7 +17,7 @@ def main(master_file_path, lastest_session_path):
             lastest_session_path, region, "participants.csv"
         )
         master_df[master_df["Lucky Draw Cluster"] == region].to_csv(
-            region_path
+            region_path, index=False
         )
 
     return region_list
