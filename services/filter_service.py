@@ -7,7 +7,7 @@ import os
 
 def main(master_file_path, lastest_session_path):
 
-    master_df = pd.read_excel(master_file_path)
+    master_df = pd.read_csv(master_file_path)
 
     region_list = master_df["Lucky Draw Cluster"].unique().tolist()
 

@@ -3,6 +3,7 @@
 try:
     import os
     from json import load, dump
+    import pandas as pd
     from services import filter_service, lottery_service
 except Exception as err:
     print(
@@ -92,7 +93,13 @@ session_index = config_data.get("session_index", totalDir + 1)
 session_folder = f"session_{session_index}"
 
 latest_session_dir = os.path.join(session_dir, session_folder)
-os.mkdir(latest_session_dir)
+try:
+    os.mkdir(latest_session_dir)
+except Exception:
+    print(
+        "\n - Session folder already exists. Increase the session_index in config.json file.\n"
+    )
+    exit()
 
 config_data["session_index"] = session_index + 1
 config_data["latest_session"] = session_folder
@@ -100,6 +107,29 @@ config_data["latest_session"] = session_folder
 # write back the session index in config file
 with open(config_file, "w") as config:
     dump(config_data, config)
+
+
+# check columns exists in master file
+try:
+    master_df = pd.read_csv(master_filepath)
+except Exception:
+    print(
+        "\n - Please check your master file format. It should be csv file !\n"
+    )
+    exit()
+
+if not {
+    "Lucky Draw Cluster",
+    "Primary Key",
+    "Total Sales",
+    "KYC contact Number",
+}.issubset(master_df.columns):
+    print("\n - Required columns are not present !\n")
+    print(
+        "\n - Make sure these 4 columns are present - Lucky Draw Cluster, Primary Key, Total Sales, KYC contact Number \n"
+    )
+    exit()
+
 
 #################
 # Start Process #
