@@ -31,7 +31,7 @@ def clean_file_data(participants_data):
         inplace=True,
     )
     participants_data.dropna(
-        subset=["region", "participant_id", "sales", "contact_number"],
+        subset=["region", "participant_id", "sales"],
         inplace=True,
     )
     if isinstance(participants_data["sales"], str):
@@ -79,7 +79,7 @@ def generate_ticket(ticket_length):
     Args:
         ticket_length(int): length of ticket characters
     """
-    return "".join(random.choices(string.digits, k=ticket_length))
+    return "".join(random.choices(string.digits[1:], k=ticket_length))
 
 
 def assign_lottery_tickets(participants_data, tickets_collection):
