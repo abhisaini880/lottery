@@ -123,10 +123,11 @@ if not {
     "Primary Key",
     "Total Sales",
     "KYC contact Number",
+    "Veet Units",
 }.issubset(master_df.columns):
     print("\n - Required columns are not present !\n")
     print(
-        "\n - Make sure these 4 columns are present - Lucky Draw Cluster, Primary Key, Total Sales, KYC contact Number \n"
+        "\n - Make sure these 5 columns are present - Lucky Draw Cluster, Primary Key, Total Sales, KYC contact Number, Veet Units \n"
     )
     exit()
 
