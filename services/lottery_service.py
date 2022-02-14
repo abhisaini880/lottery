@@ -27,6 +27,7 @@ def clean_file_data(participants_data):
             "Primary Key": "participant_id",
             "Total Sales": "sales",
             "KYC contact Number": "contact_number",
+            "Veet Units": "veet_units",
         },
         inplace=True,
     )
@@ -34,9 +35,11 @@ def clean_file_data(participants_data):
         subset=["region", "participant_id", "sales"],
         inplace=True,
     )
-    if isinstance(participants_data["sales"], str):
-        participants_data["sales"] = participants_data["sales"].str.replace(
-            ",", ""
+    participants_data["veet_units"].fillna(0, inplace=True)
+
+    if isinstance(participants_data["sales"][0], str):
+        participants_data["sales"] = participants_data["sales"].apply(
+            lambda x: x.replace(",", "")
         )
     return
 
@@ -224,6 +227,10 @@ def main(
         # assign the number of lottery tickets to user
         participants_data["tickets_count"] = participants_data["sales"].apply(
             lambda x: number_of_lottery_tickets(x)
+        )
+        participants_data["tickets_count"] = (
+            participants_data["tickets_count"]
+            + participants_data["veet_units"]
         )
 
         # generate the lottery tickets for user
