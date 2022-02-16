@@ -258,8 +258,11 @@ def main(
 
         participants_data["tickets_count"] = participants_data[
             "tickets_count"
-        ] + participants_data["veet_units"].apply(
-            lambda x: number_of_lottery_tickets_by_veet_units(x)
+        ] + participants_data.apply(
+            lambda x: number_of_lottery_tickets_by_veet_units(x.veet_units)
+            if x.sales >= 20000
+            else 0,
+            axis=1,
         )
 
         # generate the lottery tickets for user
