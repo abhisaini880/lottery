@@ -47,7 +47,7 @@ def clean_file_data(participants_data):
 def number_of_lottery_tickets(total_sales):
     """
     Function to calculate the number of lottery
-    tickets to assign for each participants.
+    tickets to assign for each participants based on sales.
 
     Args:
         total_sales(int): total sales done by the participant.
@@ -69,6 +69,33 @@ def number_of_lottery_tickets(total_sales):
             remaining_sale = total_sales // sale
             total_sales %= sale
             ticket_count += remaining_sale * sales_ticket_mapping[sale]
+
+    return min(ticket_count, max_ticket_to_assign)
+
+
+def number_of_lottery_tickets_by_veet_units(veet_units):
+    """
+    Function to calculate the number of lottery
+    tickets to assign for each participants based on veet units.
+
+    Args:
+        veet_units (int): count of veet units
+    """
+    veet_units = int(veet_units)
+
+    max_ticket_to_assign = 15
+
+    veet_ticket_mapping = {1: 1, 2: 3, 3: 5}
+
+    veet_figures = list(veet_ticket_mapping.keys())
+    ticket_count = 0
+
+    while veet_units and veet_figures and ticket_count <= max_ticket_to_assign:
+        veet_unit = veet_figures.pop()
+        if veet_units >= veet_unit:
+            remaining_sale = veet_units // veet_unit
+            veet_units %= veet_unit
+            ticket_count += remaining_sale * veet_ticket_mapping[veet_unit]
 
     return min(ticket_count, max_ticket_to_assign)
 
@@ -228,9 +255,11 @@ def main(
         participants_data["tickets_count"] = participants_data["sales"].apply(
             lambda x: number_of_lottery_tickets(x)
         )
-        participants_data["tickets_count"] = (
-            participants_data["tickets_count"]
-            + participants_data["veet_units"]
+
+        participants_data["tickets_count"] = participants_data[
+            "tickets_count"
+        ] + participants_data["veet_units"].apply(
+            lambda x: number_of_lottery_tickets_by_veet_units(x)
         )
 
         # generate the lottery tickets for user
