@@ -1,4 +1,4 @@
-# Lottery service V1
+# Lottery service
 
 1. This lottery service will accept the list of participants.
 2. Breakdown the list into multiple parts as per regions.
@@ -18,8 +18,6 @@
 
 - Total number of winners to select is defined in config file.
 - one participant with multiple tickets can only win max 3 times.
-
-# Lottery service V2
 
 ### How to run the lottery
 

@@ -23,153 +23,151 @@ def clean_file_data(participants_data):
     """
     participants_data.rename(
         columns={
-            "Region": "region",
-            "Outlet Unique Code": "participant_id",
-            "Mobile No.": "contact_number",
-            "Coupons": "coupons_count",
-            "Outlet Name": "participant_name",
+            "Lucky Draw Cluster": "region",
+            "Primary Key": "participant_id",
+            "Total Sales": "sales",
+            "KYC contact Number": "contact_number",
+            "Veet Units": "veet_units",
         },
         inplace=True,
     )
     participants_data.dropna(
-        subset=["region", "participant_id"],
+        subset=["region", "participant_id", "sales"],
         inplace=True,
     )
-    participants_data["coupons_count"].fillna(0, inplace=True)
+    participants_data["veet_units"].fillna(0, inplace=True)
 
-    # if isinstance(participants_data["sales"][0], str):
-    #     participants_data["sales"] = participants_data["sales"].apply(
-    #         lambda x: x.replace(",", "")
-    #     )
+    if isinstance(participants_data["sales"][0], str):
+        participants_data["sales"] = participants_data["sales"].apply(
+            lambda x: x.replace(",", "")
+        )
     return
 
 
-@DeprecationWarning
-def number_of_lottery_coupons(total_sales):
+def number_of_lottery_tickets(total_sales):
     """
     Function to calculate the number of lottery
-    coupons to assign for each participants based on sales.
+    tickets to assign for each participants based on sales.
 
     Args:
         total_sales(int): total sales done by the participant.
     """
 
     total_sales = int(total_sales)
-    max_coupon_to_assign = 15
+    max_ticket_to_assign = 15
 
-    sales_coupon_mapping = {20000: 1, 30000: 2, 50000: 5}
+    sales_ticket_mapping = {20000: 1, 30000: 2, 50000: 5}
 
-    sale_figures = list(sales_coupon_mapping.keys())
-    coupon_count = 0
+    sale_figures = list(sales_ticket_mapping.keys())
+    ticket_count = 0
 
     while (
-        total_sales and sale_figures and coupon_count <= max_coupon_to_assign
+        total_sales and sale_figures and ticket_count <= max_ticket_to_assign
     ):
         sale = sale_figures.pop()
         if total_sales >= sale:
             remaining_sale = total_sales // sale
             total_sales %= sale
-            coupon_count += remaining_sale * sales_coupon_mapping[sale]
+            ticket_count += remaining_sale * sales_ticket_mapping[sale]
 
-    return min(coupon_count, max_coupon_to_assign)
+    return min(ticket_count, max_ticket_to_assign)
 
 
-@DeprecationWarning
-def number_of_lottery_coupons_by_veet_units(veet_units):
+def number_of_lottery_tickets_by_veet_units(veet_units):
     """
     Function to calculate the number of lottery
-    coupons to assign for each participants based on veet units.
+    tickets to assign for each participants based on veet units.
 
     Args:
         veet_units (int): count of veet units
     """
     veet_units = int(veet_units)
 
-    max_coupon_to_assign = 15
+    max_ticket_to_assign = 15
 
-    veet_coupon_mapping = {1: 1, 2: 3, 3: 5}
+    veet_ticket_mapping = {1: 1, 2: 3, 3: 5}
 
-    veet_figures = list(veet_coupon_mapping.keys())
-    coupon_count = 0
+    veet_figures = list(veet_ticket_mapping.keys())
+    ticket_count = 0
 
-    while veet_units and veet_figures and coupon_count <= max_coupon_to_assign:
+    while veet_units and veet_figures and ticket_count <= max_ticket_to_assign:
         veet_unit = veet_figures.pop()
         if veet_units >= veet_unit:
             remaining_sale = veet_units // veet_unit
             veet_units %= veet_unit
-            coupon_count += remaining_sale * veet_coupon_mapping[veet_unit]
+            ticket_count += remaining_sale * veet_ticket_mapping[veet_unit]
 
-    return min(coupon_count, max_coupon_to_assign)
+    return min(ticket_count, max_ticket_to_assign)
 
 
-def generate_coupon(coupon_length):
+def generate_ticket(ticket_length):
     """
-    Function to generate coupon ID
-    * It will generate the coupon ID using alpha numeric characters
+    Function to generate ticket ID
+    * It will generate the ticket ID using alpha numeric characters
     * It uses `random` lib to select combination of characters
 
     Args:
-        coupon_length(int): length of coupon characters
+        ticket_length(int): length of ticket characters
     """
-    return "".join(random.choices(string.digits[1:], k=coupon_length))
+    return "".join(random.choices(string.digits[1:], k=ticket_length))
 
 
-def assign_lottery_coupons(participants_data, coupons_collection):
+def assign_lottery_tickets(participants_data, tickets_collection):
     """
-    Function to assign lottery coupons to participants
-    * It assigns the lottery coupon id as per the coupons assigned
+    Function to assign lottery tickets to participants
+    * It assigns the lottery ticket id as per the tickets assigned
         to each participant
 
     Args:
         participants_data(DataFrame): participants data for one region
     """
-    coupon_mapping_df = pd.DataFrame(
+    ticket_mapping_df = pd.DataFrame(
         columns=[
             "participant_id",
             "region",
             "contact_number",
             "sales",
-            "coupon_id",
+            "ticket_id",
         ]
     )
-    coupon_length = 5
+    ticket_length = 5
 
     for _, participant in participants_data.iterrows():
         count = 0
-        while count < participant["coupons_count"]:
-            coupon_id = generate_coupon(coupon_length)
+        while count < participant["tickets_count"]:
+            ticket_id = generate_ticket(ticket_length)
             if (
-                not coupon_mapping_df["coupon_id"].isin([coupon_id]).any()
-                and coupon_id not in coupons_collection
+                not ticket_mapping_df["ticket_id"].isin([ticket_id]).any()
+                and ticket_id not in tickets_collection
             ):
-                coupon_mapping_df = coupon_mapping_df.append(
+                ticket_mapping_df = ticket_mapping_df.append(
                     {
                         "participant_id": participant["participant_id"],
-                        "participant_name": participant["participant_name"],
                         "region": participant["region"],
                         "contact_number": participant["contact_number"],
-                        "coupon_id": coupon_id,
+                        "sales": participant["sales"],
+                        "ticket_id": ticket_id,
                     },
                     ignore_index=True,
                 )
                 count += 1
-                coupons_collection.append(coupon_id)
+                tickets_collection.append(ticket_id)
 
-    return coupon_mapping_df, coupons_collection
+    return ticket_mapping_df, tickets_collection
 
 
 def get_lottery_winners(lottery_data, winners_count):
     """
     Function call to fetch the lottery winners from
-    lottery coupons.
+    lottery tickets.
     * First find out estimated winners from lottery data
         if estimated winners are less than expected winners than
         use estimated winners count
-    * fetch the random winner, if fetched the coupon of existing winner with 3 winnings
+    * fetch the random winner, if fetched the ticket of existing winner with 3 winnings
         then discard that winner. Also, do not consider for fetching next winner.
 
     Args:
-        lottery_data(DataFrame): Lottery coupons dataframe
+        lottery_data(DataFrame): Lottery tickets dataframe
         winners_count(int): Required winners count
     """
     # In case the lottery count is less than winners count
@@ -180,22 +178,22 @@ def get_lottery_winners(lottery_data, winners_count):
         .rename_axis("participant_id")
         .reset_index(name="counts")
     )
-    # lottery_grouped_data["counts"] = lottery_grouped_data["counts"].apply(
-    #     lambda x: 3 if x > 3 else x
-    # )
-    max_coupons_can_win = lottery_grouped_data["counts"].sum()
-    winners_count = min(max_coupons_can_win, winners_count)
+    lottery_grouped_data["counts"] = lottery_grouped_data["counts"].apply(
+        lambda x: 3 if x > 3 else x
+    )
+    max_tickets_can_win = lottery_grouped_data["counts"].sum()
+    winners_count = min(max_tickets_can_win, winners_count)
 
     temp_winners_dict = defaultdict(int)
     winners_df = pd.DataFrame()
     winners_found = 0
-    one_participant_winning_limit = 1
+    one_participant_winning_limit = 3
     temp_lottery_df = lottery_data.copy()
 
     while winners_found < winners_count:
         random_winner = temp_lottery_df.sample(n=1)
         participant_id = random_winner["participant_id"].iat[0]
-        coupon_id = random_winner["coupon_id"].iat[0]
+        ticket_id = random_winner["ticket_id"].iat[0]
 
         if (
             temp_winners_dict.get(participant_id, 0)
@@ -206,7 +204,7 @@ def get_lottery_winners(lottery_data, winners_count):
             winners_found += 1
             temp_lottery_df.drop(
                 temp_lottery_df[
-                    temp_lottery_df["coupon_id"] == coupon_id
+                    temp_lottery_df["ticket_id"] == ticket_id
                 ].index,
                 inplace=True,
             )
@@ -224,6 +222,7 @@ def get_lottery_winners(lottery_data, winners_count):
 def main(
     latest_session_path,
     lottery_file,
+    winners_file,
     participant_file,
     region_list,
     config_data,
@@ -232,20 +231,15 @@ def main(
     Main function call to orchestrate all other functions to fetch the
     winners list and store that list in seprate file.
     """
-    coupons_collection = []
+    tickets_collection = []
     for region in region_list:
         region_file_path = os.path.join(latest_session_path, region)
         lottery_file_path = os.path.join(region_file_path, lottery_file)
+        winners_file_path = os.path.join(region_file_path, winners_file)
         participant_file_path = os.path.join(
             region_file_path, participant_file
         )
-        total_winners_count = (
-            config_data.get("winners_count", {}).get(region, {}).get("total")
-        )
-
-        # if not winner count then exit
-        if not total_winners_count:
-            continue
+        winners_count = config_data.get("winners_count", {}).get(region, 20)
 
         # if file not found on filepath then exit
         if not os.path.isfile(participant_file_path):
@@ -257,44 +251,35 @@ def main(
         # clean the participants file data
         clean_file_data(participants_data)
 
-        # assign the number of lottery coupons to user
-        # participants_data["coupons_count"] = participants_data["sales"].apply(
-        #     lambda x: number_of_lottery_coupons(x)
-        # )
+        # assign the number of lottery tickets to user
+        participants_data["tickets_count"] = participants_data["sales"].apply(
+            lambda x: number_of_lottery_tickets(x)
+        )
 
-        # participants_data["coupons_count"] = participants_data[
-        #     "coupons_count"
-        # ] + participants_data.apply(
-        #     lambda x: number_of_lottery_coupons_by_veet_units(x.veet_units)
-        #     if x.sales >= 20000
-        #     else 0,
-        #     axis=1,
-        # )
+        participants_data["tickets_count"] = participants_data[
+            "tickets_count"
+        ] + participants_data.apply(
+            lambda x: number_of_lottery_tickets_by_veet_units(x.veet_units)
+            if x.sales >= 20000
+            else 0,
+            axis=1,
+        )
 
-        # generate the lottery coupons for user
-        # create a seprate file for storing the lottery coupon id with user data
-        coupons_data, coupons_collection = assign_lottery_coupons(
-            participants_data, coupons_collection
+        # generate the lottery tickets for user
+        # create a seprate file for storing the lottery ticket id with user data
+        tickets_data, tickets_collection = assign_lottery_tickets(
+            participants_data, tickets_collection
         )
 
         # save the lottery data in a seperate file
-        coupons_data.to_csv(lottery_file_path, index=False)
+        tickets_data.to_csv(lottery_file_path, index=False)
 
         # select the winners from the file - max 20
         # 1 user cannot win more than 3 times
-        winners = get_lottery_winners(coupons_data, total_winners_count)
+        winners = get_lottery_winners(tickets_data, winners_count)
 
-        start, end = 0, 0
-        for prize, winners_count in (
-            config_data.get("winners_count", {}).get(region, {}).items()
-        ):
-            if prize == "total":
-                continue
-            # save the winners data in a seperate file
-            start = end
-            end += winners_count
-            winners_file_path = os.path.join(region_file_path, f"{prize}.csv")
-            winners.iloc[start:end].to_csv(winners_file_path, index=False)
+        # save the winners data in a seperate file
+        winners.to_csv(winners_file_path, index=False)
 
 
 if __name__ == "__main__":

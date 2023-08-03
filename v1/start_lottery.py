@@ -106,7 +106,7 @@ config_data["latest_session"] = session_folder
 
 # write back the session index in config file
 with open(config_file, "w") as config:
-    dump(config_data, config, indent=4)
+    dump(config_data, config)
 
 
 # check columns exists in master file
@@ -119,15 +119,15 @@ except Exception:
     exit()
 
 if not {
-    "Region",
-    "Outlet Unique Code",
-    "Outlet Name",
-    "Mobile No.",
-    "Coupons",
+    "Lucky Draw Cluster",
+    "Primary Key",
+    "Total Sales",
+    "KYC contact Number",
+    "Veet Units",
 }.issubset(master_df.columns):
     print("\n - Required columns are not present !\n")
     print(
-        "\n - Make sure these 5 columns are present - Region, Outlet Unique Code, Outlet Name, Mobile No., Coupons \n"
+        "\n - Make sure these 5 columns are present - Lucky Draw Cluster, Primary Key, Total Sales, KYC contact Number, Veet Units \n"
     )
     exit()
 
@@ -146,13 +146,14 @@ lottery_service.main(
     latest_session_path=latest_session_dir,
     participant_file=config_data.get("participant_file", "participants.csv"),
     lottery_file=config_data.get("lottery_file", "lottery.csv"),
+    winners_file=config_data.get("winners_file", "winners.csv"),
     region_list=region_list,
     config_data=config_data,
 )
 
 print("\n * Lottery services ended.")
 print(
-    f"\n * Winners list can be found under region folder inside latest session"
+    f"\n * Winners list can be found in {config_data.get('winners_file', 'winners.csv')} inside latest session"
 )
 
 print(

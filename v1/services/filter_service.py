@@ -9,14 +9,14 @@ def main(master_file_path, lastest_session_path):
 
     master_df = pd.read_csv(master_file_path)
 
-    region_list = master_df["Region"].unique().tolist()
+    region_list = master_df["Lucky Draw Cluster"].unique().tolist()
 
     for region in region_list:
         os.mkdir(os.path.join(lastest_session_path, region))
         region_path = os.path.join(
             lastest_session_path, region, "participants.csv"
         )
-        master_df[master_df["Region"] == region].to_csv(
+        master_df[master_df["Lucky Draw Cluster"] == region].to_csv(
             region_path, index=False
         )
 
